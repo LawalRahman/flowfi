@@ -37,7 +37,12 @@ export function useWithdrawIncomingStream(
 ) {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    SorobanResult,
+    unknown,
+    IncomingStreamRecord,
+    { previousStreams: IncomingStreamRecord[] | undefined; expectedWithdrawn: number } | undefined
+  >({
     mutationFn: async (stream: IncomingStreamRecord) => {
       if (!session) {
         throw new Error("Please connect your wallet first");
@@ -92,7 +97,7 @@ export function useWithdrawIncomingStream(
 
       return { previousStreams, expectedWithdrawn };
     },
-    onSuccess: async (result, stream, _variables, context) => {
+    onSuccess: async (result, stream, context) => {
       if (publicKey) {
         const targetWithdrawn = context?.expectedWithdrawn ?? stream.withdrawn;
         // Start polling in the background without blocking the mutation
